@@ -28,7 +28,8 @@ Raw JSON Orders
 - BI tools consume only curated analytics marts
 
 ---
-<img width="1024" height="1536" alt="ChatGPT Image Dec 21, 2025, 09_01_01 PM" src="https://github.com/user-attachments/assets/c5bbb088-c1ea-4efb-9ab3-dda6f391fde9" />
+<img width="1024" height="1536" alt="architecture_diagram" src="https://github.com/user-attachments/assets/8de5eb7b-40bb-471b-945d-72a487108eeb" />
+
 
 ## Repository Structure
 
