@@ -1,0 +1,31 @@
+version: 2
+
+models:
+  - name: stg_fact_orders
+    description: >
+      Cleaned and standardized order-level fact table.
+      Provides a reliable base for all downstream analytics models.
+    columns:
+      - name: order_id
+        tests:
+          - not_null
+          - unique
+      - name: order_year
+        tests:
+          - not_null
+      - name: order_month
+        tests:
+          - not_null
+
+  - name: stg_fact_order_items
+    description: "Cleaned and standardized order-item-level fact table"
+    columns:
+      - name: order_id
+        tests:
+          - not_null
+      - name: category
+        tests:
+          - not_null
+      - name: quantity
+        tests:
+          - not_null
