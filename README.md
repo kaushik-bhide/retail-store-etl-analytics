@@ -1,21 +1,31 @@
-# Store Sales ETL Analytics Pipeline (AWS S3 + Lambda + Glue + Athena + dbt)
+# Store Sales Analytics Platform  
+End-to-End ETL & ELT Analytics Project (AWS, Lambda, dbt, Athena, Looker Studio)
 
 ## Project Overview
-This project demonstrates an **end-to-end analytics ETL pipeline** built on AWS. Raw monthly transactional data lands in Amazon S3, is transformed into analytics-ready Parquet using AWS Lambda, cataloged with AWS Glue, queried in Amazon Athena, and modeled into BI/Product analytics outputs.  
+This project demonstrates a **modern analytics data platform** built using AWS services and dbt, covering the full lifecycle from **raw transactional data ingestion (ETL)** to **business-ready analytics and dashboards (ELT)**.  
 
 **Dataset:** Fully **synthetic transactional order data** generated programmatically (no personal data).
 
 ---
 
 ## Architecture
-**Flow**
-1. **S3 (Raw layer)** — monthly nested JSON files (orders)
-2. **AWS Lambda** — flattens nested JSON + explodes order items
-3. **S3 (Processed layer)** — Parquet fact datasets partitioned by month
-4. **AWS Glue Crawler** — creates Data Catalog tables and partitions
-5. **Amazon Athena** — analytics views (BI + Product metrics)
-6. **dbt (planned / in progress)** — staging + marts + tests
-7. **CI/CD (planned / in progress)** — GitHub Actions to run `dbt build`
+
+High-level flow:
+
+Raw JSON Orders  
+→ Amazon S3 (Raw Layer)  
+→ AWS Lambda (ETL: flatten & standardize)  
+→ Amazon S3 (Parquet / Processed Layer)  
+→ AWS Glue Data Catalog  
+→ Amazon Athena  
+→ dbt Cloud (ELT: Staging & Analytics Marts)  
+→ Looker Studio (Dashboards)
+
+### Architecture Principles
+- **ETL** is used to handle semi-structured JSON and produce query-efficient Parquet
+- **ELT** is used for analytics transformations and business logic
+- Clear separation between ingestion, transformation, and consumption layers
+- BI tools consume only curated analytics marts
 
 ---
 <img width="1024" height="1536" alt="ChatGPT Image Dec 21, 2025, 09_01_01 PM" src="https://github.com/user-attachments/assets/c5bbb088-c1ea-4efb-9ab3-dda6f391fde9" />
@@ -44,6 +54,29 @@ store-sales-analytics-pipeline/
 │       ├── monthly_churn.csv
 │       ├── category_sales_monthly.csv
         └── monthly_active_customers.csv
+├── dbt/
+│ ├── models/
+│ │ ├── staging/
+│ │ │ ├── stg_fact_orders.sql
+│ │ │ ├── stg_fact_order_items.sql
+│ │ │ └── staging.yml
+│ │ ├── marts/
+│ │ │ ├── mart_monthly_revenue.sql
+│ │ │ ├── mart_revenue_mom.sql
+│ │ │ ├── mart_category_sales_monthly.sql
+│ │ │ ├── mart_cohort_retention.sql
+│ │ │ ├── mart_monthly_churn.sql
+│ │ │ └── marts.yml
+│ └── dbt_project.yml
+│
+├── dashboards/
+│ └── looker/
+│ ├── store_sales_dashboard.pdf
+│ └── screenshots/
+│
+├── ci_cd/
+│ └── dbt_cloud_job_success.png
+└── README.md
 ```
 ## Data Model
 
@@ -157,16 +190,71 @@ athena/
 ```
 ## Tech Stack
 
-- AWS: S3, Lambda, Glue Crawler, Athena
+| Layer | Technology |
+|-----|-----------|
+| Object Storage | Amazon S3 |
+| ETL Processing | AWS Lambda |
+| Metadata Catalog | AWS Glue |
+| Query Engine | Amazon Athena |
+| Analytics Transformations (ELT) | dbt Cloud |
+| Visualization | Looker Studio |
+| CI/CD | dbt Cloud Jobs |
+| Languages | SQL, Python |
 
-- Python: pandas
+---
+## ELT: Analytics Modeling with dbt
 
-- SQL: window functions, cohort analysis, churn logic
+### Source Layer
+- Parquet datasets are registered in AWS Glue
+- Declared as dbt sources
 
-- dbt: analytics engineering (planned / in progress)
+### Staging Layer
+Staging models standardize and clean data:
+- Type casting
+- Date normalization
+- Stable grains
+- Flattened schemas
 
-- CI/CD: GitHub Actions (planned / in progress)
+Models:
+- `stg_fact_orders`
+- `stg_fact_order_items`
 
+### Analytics Mart Layer
+
+| Mart | Description |
+|----|------------|
+| `mart_monthly_revenue` | Monthly revenue, order count, and AOV |
+| `mart_revenue_mom` | Month-over-month growth and cumulative revenue |
+| `mart_category_sales_monthly` | Category-level sales performance |
+| `mart_cohort_retention` | Customer retention by acquisition cohort |
+| `mart_monthly_churn` | Monthly customer churn metrics |
+
+Data quality is enforced using dbt tests (not null, uniqueness).
+---
+
+## Dashboards (Looker Studio)
+
+Analytics marts are visualized using **Looker Studio**, ensuring dashboards consume **only curated dbt models**.
+
+Dashboard views include:
+- Executive revenue overview
+- Growth and month-over-month trends
+- Category performance analysis
+- Customer retention and churn metrics
+
+A PDF export of the dashboard is included for offline review.
+
+---
+
+## CI/CD (dbt Cloud)
+
+A dbt Cloud **Deployment Environment** is configured with a scheduled job that:
+
+```bash
+dbt run
+dbt test
+```
+---
 ## How to Run (High Level)
 
 - Generate synthetic monthly JSON files using:
@@ -181,13 +269,3 @@ data_generation/generate_store_sales_data.py
 - Run Glue crawler to update partitions
 
 - Query tables and views in Athena
-
-## Future Improvements
-
-- Full dbt implementation (staging + marts)
-
-- dbt tests and documentation
-
-- CI/CD enforcement with GitHub Actions
-
-- BI dashboards (Tableau/Looker Studio)
